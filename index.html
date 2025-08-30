@@ -114,8 +114,52 @@
                 <button id="close-cart-btn" class="text-gray-500 hover:text-gray-800 text-2xl">&times;</button>
             </div>
             <div id="cart-content-step" class="p-6 overflow-y-auto"></div>
-            <div id="checkout-form-step" class="p-6 border-t overflow-y-auto hidden"></div>
-            <div id="pix-payment-step" class="p-6 border-t overflow-y-auto text-center hidden"></div>
+            <div id="checkout-form-step" class="p-6 border-t overflow-y-auto hidden">
+                 <h3 class="text-lg font-bold mb-4">Detalhes da Entrega</h3>
+                <form id="checkout-form" class="space-y-4">
+                    <div>
+                        <input type="text" id="customer-name" placeholder="Seu nome completo" class="w-full p-3 border border-gray-300 rounded ring-theme focus:ring-2 focus:border-transparent">
+                        <span id="customer-name-error" class="error-message hidden">Campo obrigatório.</span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div class="col-span-2">
+                            <input type="text" id="street" placeholder="Rua / Avenida" class="w-full p-3 border border-gray-300 rounded ring-theme focus:ring-2 focus:border-transparent">
+                             <span id="street-error" class="error-message hidden">Campo obrigatório.</span>
+                        </div>
+                        <div>
+                            <input type="text" id="number" placeholder="Nº" class="w-full p-3 border border-gray-300 rounded ring-theme focus:ring-2 focus:border-transparent">
+                            <span id="number-error" class="error-message hidden">Campo obrigatório.</span>
+                        </div>
+                    </div>
+                     <div>
+                        <input type="text" id="neighborhood" placeholder="Bairro" class="w-full p-3 border border-gray-300 rounded ring-theme focus:ring-2 focus:border-transparent">
+                        <span id="neighborhood-error" class="error-message hidden">Campo obrigatório.</span>
+                    </div>
+                    <textarea id="notes" placeholder="Observações (ex: ponto de referência, tirar cebola, etc.)" class="w-full p-3 border border-gray-300 rounded ring-theme focus:ring-2 focus:border-transparent"></textarea>
+                    
+                    <h3 class="text-lg font-bold pt-4">Forma de Pagamento</h3>
+                    <div id="payment-options" class="flex space-x-4">
+                        <label class="flex items-center p-3 border rounded-lg has-[:checked]:bg-blue-50 has-[:checked]:border-blue-500 flex-1 cursor-pointer transition-colors"><input type="radio" name="payment" value="Pix" class="mr-3 form-radio text-blue-500 focus:ring-blue-500"> Pix</label>
+                        <label class="flex items-center p-3 border rounded-lg has-[:checked]:bg-blue-50 has-[:checked]:border-blue-500 flex-1 cursor-pointer transition-colors"><input type="radio" name="payment" value="Cartão" class="mr-3 form-radio text-blue-500 focus:ring-blue-500"> Cartão</label>
+                    </div>
+                     <span id="payment-error" class="error-message hidden">Selecione uma forma de pagamento.</span>
+                </form>
+            </div>
+            <div id="pix-payment-step" class="p-6 border-t overflow-y-auto text-center hidden">
+                 <h3 class="text-lg font-bold mb-2">Pagamento via Pix</h3>
+                <p class="text-gray-500 mb-4">Copie a chave abaixo, faça o pagamento no seu app do banco e anexe o comprovativo.</p>
+                <div class="p-3 bg-gray-100 rounded-lg font-mono text-lg mb-4 break-words">
+                    <span id="pix-key-display"></span>
+                </div>
+                <div>
+                    <label for="pix-proof-upload" class="cursor-pointer bg-gray-200 p-3 rounded-lg w-full inline-block hover:bg-gray-300 transition-colors">
+                        <i class="fas fa-upload mr-2"></i>
+                        <span id="pix-upload-label">Anexar Comprovativo</span>
+                    </label>
+                    <input type="file" id="pix-proof-upload" class="hidden" accept="image/*">
+                    <span id="pix-proof-error" class="error-message hidden">Por favor, anexe o comprovativo.</span>
+                </div>
+            </div>
             <div class="p-4 bg-gray-50 border-t">
                 <div id="summary" class="space-y-2 mb-4"></div>
                 <button id="next-step-btn" class="w-full bg-theme hover:bg-theme-dark text-white font-bold py-3 px-4 rounded-lg transition-colors">Continuar</button>
@@ -142,7 +186,9 @@
 
         let cart = [];
         let storeConfig = {};
-        
+        let currentStep = 1;
+
+        const pSBC = (p, c0, c1, l) => { let r,g,b,P,f,t,h,i=parseInt,m=Math.round,a=typeof(c1)=="string";if(typeof(p)!="number"||p<-1||p>1||typeof(c0)!="string"||(c0[0]!='r'&&c0[0]!='#')||(c1&&!a))return null;if(!this.pSBCr)this.pSBCr=(d)=>{let n=d.length,x={};if(n>9){[r,g,b,a]=d=d.split(","),n=d.length;if(n<3||n>4)return null;x.r=i(r[3]=="a"?r.slice(5):r.slice(4)),x.g=i(g),x.b=i(b),x.a=a?parseFloat(a):-1}else{if(n==8||n==6||n<4)return null;if(n<6)d="#"+d[1]+d[1]+d[2]+d[2]+d[3]+d[3]+(n>4?d[4]+d[4]:"");d=i(d.slice(1),16);if(n==9||n==5)x.r=d>>24&255,x.g=d>>16&255,x.b=d>>8&255,x.a=m((d&255)/0.255)/1000;else x.r=d>>16,x.g=d>>8&255,x.b=d&255,x.a=-1}return x};h=c0.length>9,h=a?c1.length>9?true:c1=="c"?!h:false:h,f=this.pSBCr(c0),P=p<0,t=c1&&c1!="c"?this.pSBCr(c1):P?{r:0,g:0,b:0,a:-1}:{r:255,g:255,b:255,a:-1},p=P?p*-1:p,P=1-p;if(!f||!t)return null;if(l)r=m(P*f.r+p*t.r),g=m(P*f.g+p*t.g),b=m(P*f.b+p*t.b);else r=m((P*f.r**2+p*t.r**2)**0.5),g=m((P*f.g**2+p*t.g**2)**0.5),b=m((P*f.b**2+p*t.b**2)**0.5);a=f.a,t=t.a,f=a>=0||t>=0,a=f?a<0?t:t<0?a:a*P+t*p:0;if(h)return"rgb"+(f?"a(":"(")+r+","+g+","+b+(f?","+m(a*1000)/1000:"")+")";else return"#"+(4294967296+r*16777216+g*65536+b*256+(f?m(a*255):0)).toString(16).slice(1,f?undefined:-2)};
         const skeletonLoader = document.getElementById('skeleton-loader');
         const pageContent = document.getElementById('page-content');
         const coverPhotoContainer = document.getElementById('cover-photo-container');
@@ -160,19 +206,19 @@
         const cartContentStep = document.getElementById('cart-content-step');
         const checkoutFormStep = document.getElementById('checkout-form-step');
         const pixPaymentStep = document.getElementById('pix-payment-step');
-
-        let currentStep = 1;
-
-        const pSBC = (p, c0, c1, l) => { let r,g,b,P,f,t,h,i=parseInt,m=Math.round,a=typeof(c1)=="string";if(typeof(p)!="number"||p<-1||p>1||typeof(c0)!="string"||(c0[0]!='r'&&c0[0]!='#')||(c1&&!a))return null;if(!this.pSBCr)this.pSBCr=(d)=>{let n=d.length,x={};if(n>9){[r,g,b,a]=d=d.split(","),n=d.length;if(n<3||n>4)return null;x.r=i(r[3]=="a"?r.slice(5):r.slice(4)),x.g=i(g),x.b=i(b),x.a=a?parseFloat(a):-1}else{if(n==8||n==6||n<4)return null;if(n<6)d="#"+d[1]+d[1]+d[2]+d[2]+d[3]+d[3]+(n>4?d[4]+d[4]:"");d=i(d.slice(1),16);if(n==9||n==5)x.r=d>>24&255,x.g=d>>16&255,x.b=d>>8&255,x.a=m((d&255)/0.255)/1000;else x.r=d>>16,x.g=d>>8&255,x.b=d&255,x.a=-1}return x};h=c0.length>9,h=a?c1.length>9?true:c1=="c"?!h:false:h,f=this.pSBCr(c0),P=p<0,t=c1&&c1!="c"?this.pSBCr(c1):P?{r:0,g:0,b:0,a:-1}:{r:255,g:255,b:255,a:-1},p=P?p*-1:p,P=1-p;if(!f||!t)return null;if(l)r=m(P*f.r+p*t.r),g=m(P*f.g+p*t.g),b=m(P*f.b+p*t.b);else r=m((P*f.r**2+p*t.r**2)**0.5),g=m((P*f.g**2+p*t.g**2)**0.5),b=m((P*f.b**2+p*t.b**2)**0.5);a=f.a,t=t.a,f=a>=0||t>=0,a=f?a<0?t:t<0?a:a*P+t*p:0;if(h)return"rgb"+(f?"a(":"(")+r+","+g+","+b+(f?","+m(a*1000)/1000:"")+")";else return"#"+(4294967296+r*16777216+g*65536+b*256+(f?m(a*255):0)).toString(16).slice(1,f?undefined:-2)};
-
+        
         document.addEventListener('DOMContentLoaded', async () => {
             loadCartFromStorage();
             await loadStoreConfig();
             await loadMenuAndStats();
-
+            
             setTimeout(() => {
-                skeletonLoader.style.display = 'none';
-                pageContent.classList.remove('hidden');
+                if (!document.body.classList.contains('permission-error')) {
+                    skeletonLoader.style.display = 'none';
+                    pageContent.classList.remove('hidden');
+                    cartFab.style.opacity = 1;
+                    cartFab.style.transform = 'translateY(0)';
+                }
             }, 500);
         });
         
@@ -183,47 +229,39 @@
         }
         
         async function loadStoreConfig() {
-            try {
-                // Para demonstração, usamos dados de exemplo
-                storeConfig = {
-                    name: "CardápioGram Demo",
-                    bio: "Os melhores lanches da cidade, com um toque de rede social!",
-                    coverPhotoUrl: "https://images.unsplash.com/photo-1550547660-d9450f859349?q=80&w=2500&auto=format&fit=crop",
-                    profilePictureUrl: "https://images.unsplash.com/photo-1571091718767-18b5b1457add?q=80&w=2672&auto=format&fit=crop",
-                    verified: true,
-                    clients: 1842,
-                    whatsappNumber: "5511999998888", // Substitua pelo seu número
-                    instagram: "#",
-                    facebook: "#",
-                    themeColor: "#e11d48" // Cor de exemplo (rosa)
-                };
+             storeConfig = {
+                name: "HamburGuia",
+                bio: "Os melhores burgers artesanais da ilha! Feitos com ingredientes frescos e um toque de magia.",
+                coverPhotoUrl: "https://images.unsplash.com/photo-1550547660-d9450f859349?q=80&w=2500&auto=format&fit=crop",
+                profilePictureUrl: "https://images.unsplash.com/photo-1571091718767-18b5b1457add?q=80&w=2672&auto=format&fit=crop",
+                verified: true,
+                clients: 1842,
+                whatsappNumber: "5511999998888",
+                phone: "551133334444",
+                instagram: "https://instagram.com",
+                facebook: "https://facebook.com",
+                themeColor: "#f97316"
+            };
 
-                storeName.textContent = storeConfig.name;
-                storeBio.textContent = storeConfig.bio;
-                coverPhotoContainer.style.backgroundImage = `url('${optimizeCloudinaryUrl(storeConfig.coverPhotoUrl, 'w_1200,q_auto,f_auto')}')`;
-                profilePicture.src = optimizeCloudinaryUrl(storeConfig.profilePictureUrl, 'w_256,q_auto,f_auto');
-
-                if(storeConfig.verified) document.getElementById('verified-badge').classList.remove('hidden');
-                statsClients.textContent = storeConfig.clients;
-
-                const whatsappBtn = document.getElementById('whatsapp-button');
-                const phoneBtn = document.getElementById('phone-button');
-                const socialLinksContainer = document.getElementById('social-links');
-                
-                if(storeConfig.whatsappNumber) whatsappBtn.href = `https://wa.me/${storeConfig.whatsappNumber}`;
-                if(storeConfig.phone) { phoneBtn.href = `tel:${storeConfig.phone}`; phoneBtn.classList.remove('hidden'); }
-                
-                socialLinksContainer.innerHTML = '';
-                if(storeConfig.instagram) socialLinksContainer.innerHTML += `<a href="${storeConfig.instagram}" target="_blank" class="hover:text-gray-800 transition-transform hover:scale-110"><i class="fab fa-instagram"></i></a>`;
-                if(storeConfig.facebook) socialLinksContainer.innerHTML += `<a href="${storeConfig.facebook}" target="_blank" class="hover:text-gray-800 transition-transform hover:scale-110"><i class="fab fa-facebook"></i></a>`;
-
-                const root = document.documentElement;
-                root.style.setProperty('--theme-color', storeConfig.themeColor);
-                root.style.setProperty('--theme-color-dark', pSBC(-0.2, storeConfig.themeColor));
-                
-            } catch (error) { 
-                console.error("Erro ao carregar config da loja:", error);
-            }
+            const themeColor = storeConfig.themeColor || '#3b82f6';
+            document.title = storeConfig.name || "CardápioGram";
+            storeName.textContent = storeConfig.name;
+            storeBio.textContent = storeConfig.bio;
+            coverPhotoContainer.style.backgroundImage = `url('${optimizeCloudinaryUrl(storeConfig.coverPhotoUrl, 'w_1200,q_auto,f_auto')}')`;
+            profilePicture.src = optimizeCloudinaryUrl(storeConfig.profilePictureUrl, 'w_256,q_auto,f_auto');
+            if(storeConfig.verified) document.getElementById('verified-badge').classList.remove('hidden');
+            statsClients.textContent = storeConfig.clients;
+            const whatsappBtn = document.getElementById('whatsapp-button');
+            const phoneBtn = document.getElementById('phone-button');
+            const socialLinksContainer = document.getElementById('social-links');
+            if(storeConfig.whatsappNumber) whatsappBtn.href = `https://wa.me/${storeConfig.whatsappNumber}`;
+            if(storeConfig.phone) { phoneBtn.href = `tel:${storeConfig.phone}`; phoneBtn.classList.remove('hidden'); }
+            socialLinksContainer.innerHTML = '';
+            if(storeConfig.instagram) socialLinksContainer.innerHTML += `<a href="${storeConfig.instagram}" target="_blank" class="hover:text-gray-800 transition-transform hover:scale-110"><i class="fab fa-instagram"></i></a>`;
+            if(storeConfig.facebook) socialLinksContainer.innerHTML += `<a href="${storeConfig.facebook}" target="_blank" class="hover:text-gray-800 transition-transform hover:scale-110"><i class="fab fa-facebook"></i></a>`;
+            const root = document.documentElement;
+            root.style.setProperty('--theme-color', themeColor);
+            root.style.setProperty('--theme-color-dark', pSBC(-0.2, themeColor));
         }
         
         async function loadMenuAndStats() {
@@ -233,7 +271,6 @@
                 { id: '3', name: 'Refrigerante Gelado', description: 'Para refrescar o seu dia.', price: 7.00, imageUrls: ['https://images.unsplash.com/photo-1581006852262-5b32159d28b1?q=80&w=2574&auto=format&fit=crop', 'https://images.unsplash.com/photo-1625772299848-391b6a87d7b3?q=80&w=2574&auto=format&fit=crop'] },
                 { id: '4', name: 'X-Bacon Especial', description: 'Uma explosão de sabor com muito bacon crocante e queijo derretido.', price: 29.90, imageUrls: ['https://images.unsplash.com/photo-1551782450-a2132b4ba21d?q=80&w=2669&auto=format&fit=crop', 'https://images.unsplash.com/photo-1606131731446-5568d87113aa?q=80&w=2574&auto=format&fit=crop'] }
             ];
-            
             statsItems.textContent = demoItems.length;
             statsOrders.textContent = Math.floor(Math.random() * 20) + 5;
             menuContainer.innerHTML = '';
@@ -243,10 +280,8 @@
         function renderMenuItem(item) {
             const itemEl = document.createElement('div');
             itemEl.className = 'bg-white rounded-lg shadow-md overflow-hidden flex flex-col';
-            
             const imageUrls = (item.imageUrls || []).map(url => optimizeCloudinaryUrl(url, 'w_400,q_auto,f_auto'));
             let imageHtml = '';
-
             if (imageUrls.length > 1) {
                 const slides = imageUrls.map(url => `<div class="carousel-item flex-shrink-0 w-full"><img src="${url}" alt="${item.name}" loading="lazy" class="w-full h-48 object-cover"></div>`).join('');
                 const dots = imageUrls.map((_, i) => `<button data-slide-to="${i}" class="carousel-dot h-2 w-2 rounded-full ${i === 0 ? 'bg-white' : 'bg-white/50'} transition-colors"></button>`).join('');
@@ -261,29 +296,74 @@
                 const singleImage = imageUrls[0] || 'https://placehold.co/400x300/e2e8f0/333?text=Sem+Foto';
                 imageHtml = `<img src="${singleImage}" alt="${item.name}" loading="lazy" class="w-full h-48 object-cover">`;
             }
-
-            itemEl.innerHTML = `
-                ${imageHtml}
-                <div class="p-4 flex flex-col flex-grow">
-                    <h3 class="text-lg font-bold text-gray-800">${item.name}</h3>
-                    <p class="text-gray-600 mt-2 text-sm flex-grow">${item.description}</p>
-                    <div class="flex justify-between items-center mt-4">
-                        <span class="text-xl font-bold text-theme">R$ ${(item.price || 0).toFixed(2)}</span>
-                        <button class="add-to-cart-btn bg-theme hover:bg-theme-dark text-white font-bold py-2 px-4 rounded-lg transition-all duration-300 flex items-center justify-center space-x-2" data-id="${item.id}" data-name="${item.name}" data-price="${item.price}">
-                            <i class="fas fa-cart-plus"></i>
-                        </button>
-                    </div>
-                </div>
-            `;
+            itemEl.innerHTML = `${imageHtml}<div class="p-4 flex flex-col flex-grow"><h3 class="text-lg font-bold text-gray-800">${item.name}</h3><p class="text-gray-600 mt-2 text-sm flex-grow">${item.description}</p><div class="flex justify-between items-center mt-4"><span class="text-xl font-bold text-theme">R$ ${(item.price || 0).toFixed(2)}</span><button class="add-to-cart-btn bg-theme hover:bg-theme-dark text-white font-bold py-2 px-4 rounded-lg transition-all duration-300 flex items-center justify-center space-x-2" data-id="${item.id}" data-name="${item.name}" data-price="${item.price}"><i class="fas fa-cart-plus"></i></button></div></div>`;
             menuContainer.appendChild(itemEl);
         }
 
-        // --- LÓGICA DO CARRINHO E CHECKOUT ---
-        // (O código completo do carrinho e checkout foi omitido para brevidade, mas está aqui)
-        function loadCartFromStorage() { /* ... */ }
-        function saveCartToStorage() { /* ... */ }
-        // ... etc
+        function openModal() { currentStep = 1; updateModalView(); cartModal.classList.remove('hidden'); setTimeout(() => cartModal.style.opacity = 1, 10); }
+        function closeModal() { cartModal.style.opacity = 0; setTimeout(() => cartModal.classList.add('hidden'), 300); }
+        function updateModalView() {
+            cartContentStep.classList.toggle('hidden', currentStep !== 1);
+            checkoutFormStep.classList.toggle('hidden', currentStep !== 2);
+            pixPaymentStep.classList.toggle('hidden', currentStep !== 3);
+            if (currentStep === 1) { modalTitle.textContent = 'Seu Pedido'; nextStepBtn.textContent = 'Continuar para Entrega'; nextStepBtn.classList.remove('bg-green-600', 'hover:bg-green-700'); nextStepBtn.classList.add('bg-theme', 'hover:bg-theme-dark'); } else if (currentStep === 2) { modalTitle.textContent = 'Detalhes da Entrega'; nextStepBtn.textContent = 'Finalizar Pedido'; } else if (currentStep === 3) { modalTitle.textContent = 'Pagamento via Pix'; nextStepBtn.textContent = 'Confirmar e Enviar Pedido'; nextStepBtn.classList.remove('bg-theme', 'hover:bg-theme-dark'); nextStepBtn.classList.add('bg-green-600', 'hover:bg-green-700'); }
+        }
+        function handleNextStep() { if (currentStep === 1) { if(cart.length === 0) return; currentStep = 2; updateModalView(); } else { finalizeOrder(); } }
+        function validateForm() { let isValid = true; const fields = ['customer-name', 'street', 'number', 'neighborhood']; fields.forEach(id => { const input = document.getElementById(id); const errorSpan = document.getElementById(`${id}-error`); if (!input.value.trim()) { isValid = false; input.classList.add('form-input-error'); errorSpan.classList.remove('hidden'); } else { input.classList.remove('form-input-error'); errorSpan.classList.add('hidden'); } }); const paymentMethod = document.querySelector('input[name="payment"]:checked'); const paymentError = document.getElementById('payment-error'); if (!paymentMethod) { isValid = false; paymentError.classList.remove('hidden'); } else { paymentError.classList.add('hidden'); } return isValid; }
+        async function uploadFileToCloudinary(file) { if (!storeConfig.cloudinaryCloudName || !storeConfig.cloudinaryUploadPreset) { console.error("Configurações do Cloudinary não encontradas."); return null; } const formData = new FormData(); formData.append('file', file); formData.append('upload_preset', storeConfig.cloudinaryUploadPreset); const url = `https://api.cloudinary.com/v1_1/${storeConfig.cloudinaryCloudName}/image/upload`; try { const response = await fetch(url, { method: 'POST', body: formData }); if (!response.ok) throw new Error('Upload failed'); const data = await response.json(); return data.secure_url; } catch (error) { console.error("Erro no upload para o Cloudinary:", error); return null; } }
+        async function finalizeOrder() { if (currentStep === 2) { if (!validateForm()) return; const paymentMethod = document.querySelector('input[name="payment"]:checked').value; if (paymentMethod === 'Pix') { if (!storeConfig.pixKey) { alert('A loja não configurou uma chave Pix para pagamentos.'); return; } document.getElementById('pix-key-display').textContent = storeConfig.pixKey; currentStep = 3; updateModalView(); return; } } const proofError = document.getElementById('pix-proof-error'); proofError.classList.add('hidden'); let paymentProofUrl = null; nextStepBtn.disabled = true; nextStepBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> A finalizar...`; if (currentStep === 3) { const proofFile = document.getElementById('pix-proof-upload').files[0]; if (!proofFile) { proofError.classList.remove('hidden'); nextStepBtn.disabled = false; nextStepBtn.textContent = 'Confirmar e Enviar Pedido'; return; } paymentProofUrl = await uploadFileToCloudinary(proofFile); if(!paymentProofUrl){ alert('Houve um erro ao enviar o seu comprovativo. Tente novamente.'); nextStepBtn.disabled = false; nextStepBtn.textContent = 'Confirmar e Enviar Pedido'; return; } } const address = { name: document.getElementById('customer-name').value, street: document.getElementById('street').value, number: document.getElementById('number').value, neighborhood: document.getElementById('neighborhood').value, notes: document.getElementById('notes').value, }; const paymentMethod = document.querySelector('input[name="payment"]:checked').value; const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0); const total = subtotal + (storeConfig.deliveryFee || 0); const orderData = { items: cart, address, paymentMethod, paymentProofUrl, subtotal, deliveryFee: storeConfig.deliveryFee || 0, total, status: 'aberto', timestamp: firebase.firestore.FieldValue.serverTimestamp(), date: new Date().toISOString().split('T')[0] }; try { const docRef = await db.collection('pedidos').add(orderData); const orderIdShort = docRef.id.substring(0, 6); let message = `*Olá, ${storeConfig.name}! Gostaria de fazer um novo pedido.*\n\n*Pedido:* #${orderIdShort}\n\n*Itens:*\n`; cart.forEach(item => { message += `- ${item.quantity}x ${item.name}\n`; }); message += `\n*Subtotal:* R$ ${subtotal.toFixed(2)}\n*Taxa de Entrega:* R$ ${(storeConfig.deliveryFee || 0).toFixed(2)}\n*Total:* R$ ${total.toFixed(2)}\n\n*Forma de Pagamento:* ${paymentMethod}\n\n*Entregar para:* ${address.name}\n*Endereço:* ${address.street}, ${address.number} - ${address.neighborhood}\n`; if(address.notes) { message += `*Observações:* ${address.notes}\n`; } if(paymentProofUrl) { message += `\n*Comprovativo de Pagamento:* ${paymentProofUrl}\n` } const whatsappUrl = `https://wa.me/${storeConfig.whatsappNumber}?text=${encodeURIComponent(message)}`; cart = []; updateCart(); window.location.href = whatsappUrl; } catch (error) { console.error("Erro ao finalizar o pedido:", error); alert('Não foi possível finalizar o seu pedido. Por favor, tente novamente.'); } finally { nextStepBtn.disabled = false; updateModalView(); } }
+        function addToCart(id, name, price) { const existingItem = cart.find(item => item.id === id); if (existingItem) { existingItem.quantity++; } else { cart.push({ id, name, price, quantity: 1 }); } updateCart(); }
+        function updateCart() { saveCartToStorage(); updateCartCount(); renderCartItems(); updateSummary(); }
+        function updateQuantity(id, newQuantity) { const item = cart.find(item => item.id === id); if (item) { if (newQuantity <= 0) { cart = cart.filter(cartItem => cartItem.id !== id); } else { item.quantity = newQuantity; } } updateCart(); }
+        function updateCartCount() { const count = cart.reduce((sum, item) => sum + item.quantity, 0); document.getElementById('cart-count').textContent = count; }
+        function renderCartItems() { if (cart.length === 0) { cartContentStep.innerHTML = '<p class="text-gray-500 text-center">Seu carrinho está vazio.</p>'; nextStepBtn.classList.add('opacity-50', 'cursor-not-allowed'); } else { nextStepBtn.classList.remove('opacity-50', 'cursor-not-allowed'); cartContentStep.innerHTML = cart.map(item => `<div class="flex justify-between items-center mb-4 pb-4 border-b border-gray-200"><div><p class="font-semibold">${item.name}</p><p class="text-sm text-gray-600">R$ ${(item.price || 0).toFixed(2)}</p></div><div class="flex items-center space-x-4"><button class="quantity-change-btn text-lg" data-id="${item.id}" data-change="-1">-</button><span class="font-bold text-lg">${item.quantity}</span><button class="quantity-change-btn text-lg text-theme" data-id="${item.id}" data-change="1">+</button></div></div>`).join(''); } }
+        function updateSummary() { const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0); const deliveryFee = storeConfig.deliveryFee || 0; const total = subtotal + deliveryFee; document.getElementById('summary').innerHTML = `<div class="flex justify-between text-gray-600"><span>Subtotal</span><span>R$ ${subtotal.toFixed(2)}</span></div><div class="flex justify-between text-gray-600"><span>Taxa de Entrega</span><span>R$ ${deliveryFee.toFixed(2)}</span></div><div class="flex justify-between font-bold text-lg text-gray-800"><span>Total</span><span>R$ ${total.toFixed(2)}</span></div>`; }
+        function saveCartToStorage() { localStorage.setItem('onlineCart', JSON.stringify(cart)); }
+        function loadCartFromStorage() { const savedCart = localStorage.getItem('onlineCart'); if (savedCart) { cart = JSON.parse(savedCart); } }
+        
+        document.getElementById('open-cart-btn').addEventListener('click', openModal);
+        document.getElementById('close-cart-btn').addEventListener('click', closeModal);
+        nextStepBtn.addEventListener('click', handleNextStep);
+        document.getElementById('pix-proof-upload').addEventListener('change', e => { const label = document.getElementById('pix-upload-label'); if (e.target.files.length > 0) { label.textContent = e.target.files[0].name; document.getElementById('pix-proof-error').classList.add('hidden'); } else { label.textContent = 'Anexar Comprovativo'; } });
+        menuContainer.addEventListener('click', e => { 
+            const btn = e.target.closest('.add-to-cart-btn'); 
+            if (btn && !btn.classList.contains('added')) { 
+                const originalContent = btn.innerHTML; 
+                const data = btn.dataset; 
+                addToCart(data.id, data.name, parseFloat(data.price)); 
+                btn.classList.add('added'); 
+                btn.innerHTML = `<i class="fas fa-check"></i>`; 
+                setTimeout(() => { btn.classList.remove('added'); btn.innerHTML = originalContent; }, 1500); 
+            }
+            
+            const carousel = e.target.closest('.carousel');
+            if (!carousel) return;
+            const track = carousel.querySelector('.carousel-track');
+            const slides = Array.from(track.children);
+            if(slides.length <= 1) return;
+
+            let currentIndex = parseInt(track.dataset.index || '0');
+
+            if (e.target.closest('.carousel-next')) {
+                currentIndex = (currentIndex + 1) % slides.length;
+            } else if (e.target.closest('.carousel-prev')) {
+                currentIndex = (currentIndex - 1 + slides.length) % slides.length;
+            } else if (e.target.closest('.carousel-dot')) {
+                currentIndex = parseInt(e.target.dataset.slideTo);
+            } else {
+                return;
+            }
+            track.style.transform = `translateX(-${currentIndex * 100}%)`;
+            track.dataset.index = currentIndex;
+            carousel.querySelectorAll('.carousel-dot').forEach((dot, i) => {
+                dot.classList.toggle('bg-white', i === currentIndex);
+                dot.classList.toggle('bg-white/50', i !== currentIndex);
+            });
+        });
+        cartContentStep.addEventListener('click', e => { if (e.target.classList.contains('quantity-change-btn')) { const data = e.target.dataset; updateQuantity(data.id, (cart.find(i => i.id === data.id)?.quantity || 0) + parseInt(data.change)); } });
     </script>
 </body>
 </html>
+
+
 
